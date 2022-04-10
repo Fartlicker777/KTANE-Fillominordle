@@ -140,10 +140,10 @@ public class Fillominordle : MonoBehaviour {
          return;
       }
       if (A == Arrows[0]) {
-         StageN = StageN + 1 == 8 ? 1 : StageN + 1;
+         StageN = StageN - 1 == 0 ? 7 : StageN - 1;
       }
       else {
-         StageN = StageN - 1 == 0 ? 7 : StageN - 1;
+         StageN = StageN + 1 == 8 ? 1 : StageN + 1;
       }
       UpdateStage();
    }
@@ -204,7 +204,7 @@ public class Fillominordle : MonoBehaviour {
       for (int i = 0; i < 25; i++) {
          if (ColStates[StageN - 1][i] != 2) {
             Animating = false;
-            ArrowPress(Arrows[0]);
+            ArrowPress(Arrows[1]);
             UpdateStage();
             WillSolve = false;
             break;
