@@ -359,32 +359,44 @@ public class Fillominordle : MonoBehaviour {
    }
 
 #pragma warning disable 414
-   private readonly string TwitchHelpMessage = @"Use !{0} 12873192... to input the 25 digit number all at once. Use cycle to see all results so far.";
+   private readonly string TwitchHelpMessage = "Use \"!{0} 12873192...\" to input a 25 digit number onto the module in reading order. Use \"!{0} cycle\" to see all results so far. Use \"!{0} cb\" to toggle colorblind mode.";
 #pragma warning restore 414
 
    IEnumerator ProcessTwitchCommand (string Command) {
-      Command = Command.Trim().ToUpper().Split(' ').Join("");
-      yield return null;
-      if (Command == "CYCLE") {
-         for (int i = 0; i < 7; i++) {
-            Arrows[0].OnInteract();
-            yield return new WaitForSeconds(.1f);
-         }
-         for (int i = 0; i < StageN; i++) {
-            Arrows[1].OnInteract();
-            yield return new WaitForSeconds(1f);
-         }
-      }
-      else if (Command.Length != 25 || !Command.Any(x => "123456789".Contains(x))) {
-         yield return "sendtochaterror I don't understand";
-      }
-      else {
-         for (int i = 0; i < 25; i++) {
-            NumberButtons[int.Parse(Command[i].ToString()) - 1].OnInteract();
-            yield return new WaitForSeconds(.1f);
-         }
-         SubmitPress();
-      }
+        Command = Command.Trim().ToUpperInvariant().Split(' ').Join("");
+        if (Command == "CYCLE") {
+            if (StageN == 1)
+            {
+                yield return "sendtochaterror You have not made your first guess yet!";
+                yield break;
+            }
+            yield return null;
+            for (int i = 0; i < 7; i++) {
+                Arrows[0].OnInteract();
+                yield return new WaitForSeconds(.1f);
+            }
+            for (int i = 0; i < StageN; i++) {
+                yield return new WaitForSeconds(1f);
+                Arrows[1].OnInteract();
+            }
+        }
+        else if (Command == "CB") {
+            yield return null;
+            cbMode ^= true;
+        }
+        else if (Command.Length != 25 || !Command.All(x => "123456789".Contains(x))) {
+            yield return string.Format("sendtochaterror I don't understand what \"{0}\" corresponds to!", Command);
+        }
+        else {
+            yield return null;
+            if (Selected != 0)
+                GridButtons[0].OnInteract();
+            for (int i = 0; i < 25; i++) {
+                NumberButtons[int.Parse(Command[i].ToString()) - 1].OnInteract();
+                yield return new WaitForSeconds(.1f);
+            }
+            SubmitPress();
+        }
    }
 
    IEnumerator TwitchHandleForcedSolve () {
